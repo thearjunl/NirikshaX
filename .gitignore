@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.json
+output/
+temp_chrome_history
