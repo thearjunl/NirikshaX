@@ -1,5 +1,4 @@
 import logging
-from rich.logging import RichHandler
 from rich.console import Console
 from rich.theme import Theme
 
@@ -14,15 +13,17 @@ custom_theme = Theme({
 
 console = Console(theme=custom_theme)
 
-def setup_logger():
-    """Configures and returns a rich logger."""
-    logging.basicConfig(
-        level="INFO",
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True)]
-    )
-    log = logging.getLogger("rich")
-    return log, console
+class DFIRLogger:
+    def info(self, message):
+        console.print(f"[bold cyan][*][/bold cyan] {message}")
 
-log, console = setup_logger()
+    def success(self, message):
+        console.print(f"[bold green][+][/bold green] {message}")
+
+    def warning(self, message):
+        console.print(f"[bold yellow][!][/bold yellow] {message}")
+    
+    def error(self, message):
+        console.print(f"[bold red][!][/bold red] {message}")
+
+log = DFIRLogger()

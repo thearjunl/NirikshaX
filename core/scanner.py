@@ -9,9 +9,9 @@ class Scanner:
         self.scan_results = []
         self.suspicious_files = []
 
-    def scan(self):
+    def scan(self, progress_callback=None):
         """Recursively scans the directory for files and identifies them."""
-        log.info(f"[bold cyan]Starting scan on: {self.target_dir}[/bold cyan]")
+        # log.info(f"Starting scan on: {self.target_dir}") # Moved logging to CLI for cleaner output control
         
         for root, dirs, files in os.walk(self.target_dir):
             for file in files:
@@ -21,10 +21,15 @@ class Scanner:
                     if file_info:
                         self.scan_results.append(file_info)
                         self.check_suspicious(file_info)
+                        
+                        if progress_callback:
+                            progress_callback(file_info)
+                            
                 except Exception as e:
-                    log.error(f"Error scanning {file_path}: {e}")
+                    # log.error(f"Error scanning {file_path}: {e}")
+                    pass # Suppress individual file errors during scan to keep CLI clean
 
-        log.info(f"[bold green]Scan complete. Found {len(self.scan_results)} files.[/bold green]")
+        # log.success(f"Scan complete. Found {len(self.scan_results)} files.")
         return self.scan_results
 
     def analyze_file(self, file_path):
