@@ -21,19 +21,35 @@ from utils.logger import log, console
 
 def print_banner():
     banner_text = """
-    [bold cyan]    
-    ███╗   ██╗██╗██████╗ ██╗██╗  ██╗███████╗██╗  ██╗ █████╗ ██╗  ██╗
-    ████╗  ██║██║██╔══██╗██║██║ ██╔╝██╔════╝██║  ██║██╔══██╗╚██╗██╔╝
-    ██╔██╗ ██║██║██████╔╝██║█████╔╝ ███████╗███████║███████║ ╚███╔╝ 
-    ██║╚██╗██║██║██╔══██╗██║██╔═██╗ ╚════██║██╔══██║██╔══██║ ██╔██╗ 
-    ██║ ╚████║██║██║  ██║██║██║  ██╗███████║██║  ██║██║  ██║██╔╝ ██╗
-    ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+    [bold cyan]
+          .                                                      .
+        .n                   .                 .                  n.
+      . .dP                  dP                   9b                 9b. .
+     4    qXb. .       ___ ._.                     ._. ___       .dXp    t
+    dX.    9Xb      .dXb    __                     __    dXb.     dXP     .Xb
+    9XXb._       _.dXXXXb dXXXXbo.               .odXXXXb dXXXXb._       _.dXXP
+     9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
+      `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP'
+        `9XXXXXXXXXXXP' `9XX'   DIE    `98v8P'  HUMAN   `XXP' `9XXXXXXXXXXXP'
+            ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
+                            )b.  .dbo.dP'`v'`9b.odb.  .dX(
+                          ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
+                         dXXXXXXXXXXXP'   .   `9XXXXXXXXXXXb
+                        dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
+                        9XXb'   `XXXXXb.dX|Xb.dXXXXX'   `dXXP
+                         `'      9XXXXXX(   )XXXXXXP      `'
+                                  XXXX X.`v'.X XXXX
+                                  XP^X'`b   d'`X^XX
+                                  X. 9  `   '  P )X
+                                  `b  `       '  d'
+                                   `             '
     [/bold cyan]
-    [bold white]    DIGITAL FORENSIC RECOVERY & INVESTIGATION UTILITY[/bold white]
-    [dim]    v1.0.0 | Coded for Professional Use[/dim]
+    [bold white]          NirikshaX — Digital Forensic Recovery & Investigation Toolkit[/bold white]
+    [dim]                  v1.0.0 | Author: NirikshaX Team[/dim]
     """
-    console.print(banner_text)
-    console.print("[bold red]    [!] AUTHORIZED USE ONLY. DO NOT USE FOR ILLEGAL ACTIVITIES.[/bold red]\n")
+    console.print(banner_text, justify="center")
+    console.print("[bold red][!] AUTHORIZED USE ONLY. OBSERVE & REPORT.[/bold red]", justify="center")
+    console.print()
 
 def cmd_scan(args):
     """Handles the scan command with professional UI."""
