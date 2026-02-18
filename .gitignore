@@ -3,3 +3,5 @@ __pycache__/
 *.json
 output/
 temp_chrome_history
+scan_report.pdf
+debug_output.txt

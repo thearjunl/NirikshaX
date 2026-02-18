@@ -18,6 +18,7 @@ from artifacts.system_info import get_system_info
 from artifacts.recent_files import RecentFilesScanner
 from artifacts.browser_history import BrowserHistoryExtractor
 from utils.logger import log, console
+from utils.report_generator import generate_pdf_report
 
 def print_banner():
     banner_text = """
@@ -45,7 +46,7 @@ def print_banner():
                                    `             '
     [/bold cyan]
     [bold white]          NirikshaX — Digital Forensic Recovery & Investigation Toolkit[/bold white]
-    [dim]                  v1.0.0 | Author: NirikshaX Team[/dim]
+    [dim]                  v1.1.0 | Author: NirikshaX Team[/dim]
     """
     console.print(banner_text, justify="center")
     console.print("[bold red][!] AUTHORIZED USE ONLY. OBSERVE & REPORT.[/bold red]", justify="center")
@@ -54,6 +55,8 @@ def print_banner():
 def cmd_scan(args):
     """Handles the scan command with professional UI."""
     log.info(f"Target: [bold white]{args.target}[/bold white]")
+    if args.hash:
+        log.info("[yellow]Hashing enabled (SHA256). Scan may take longer.[/yellow]")
     log.info("Initializing scanning engine...")
     
     scanner = Scanner(args.target)
@@ -72,7 +75,7 @@ def cmd_scan(args):
             progress.update(task, last_file=os.path.basename(file_info["path"])[:30])
         
         # Run scan
-        results = scanner.scan(progress_callback=update_progress)
+        results = scanner.scan(progress_callback=update_progress, calculate_hashes=args.hash)
         progress.update(task, description="[bold green]Scan Complete[/bold green]", last_file=f"{len(results)} files found")
 
     console.print() 
@@ -125,6 +128,15 @@ def cmd_scan(args):
     with open(report_file, "w") as f:
         json.dump(report, f, indent=4)
     log.success(f"Full report saved to [bold white]{report_file}[/bold white]")
+
+    # Generate PDF Report
+    if args.report:
+        pdf_file = "scan_report.pdf"
+        log.info("Generating PDF report...")
+        if generate_pdf_report(report, pdf_file):
+            log.success(f"PDF report saved to [bold white]{pdf_file}[/bold white]")
+        else:
+            log.error("Failed to generate PDF report.")
 
 def cmd_recover(args):
     """Handles the recover command."""
@@ -206,6 +218,8 @@ def main():
     # Scan Command
     scan_parser = subparsers.add_parser("scan", help="Scan a directory")
     scan_parser.add_argument("target", help="Directory to scan")
+    scan_parser.add_argument("--hash", action="store_true", help="Calculate SHA256 hash for files")
+    scan_parser.add_argument("--report", action="store_true", help="Generate PDF report")
 
     # Recover Command
     recover_parser = subparsers.add_parser("recover", help="Recover files")

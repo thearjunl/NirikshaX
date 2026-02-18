@@ -1,39 +1,52 @@
 import os
 import time
+import hashlib
+import concurrent.futures
 from core.signatures import get_file_type
 from utils.logger import log
 
 class Scanner:
-    def __init__(self, target_dir):
+    def __init__(self, target_dir, threads=4):
         self.target_dir = target_dir
+        self.threads = threads
         self.scan_results = []
         self.suspicious_files = []
 
-    def scan(self, progress_callback=None):
-        """Recursively scans the directory for files and identifies them."""
-        # log.info(f"Starting scan on: {self.target_dir}") # Moved logging to CLI for cleaner output control
+    def scan(self, progress_callback=None, calculate_hashes=False):
+        """Recursively scans the directory for files and identifies them using multi-threading."""
+        files_to_scan = []
         
-        for root, dirs, files in os.walk(self.target_dir):
+        # First, walk the directory to gather all file paths (fast operation)
+        for root, _, files in os.walk(self.target_dir):
             for file in files:
-                file_path = os.path.join(root, file)
+                files_to_scan.append(os.path.join(root, file))
+
+        # Use ThreadPoolExecutor for parallel file analysis
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+            # Submit all tasks
+            future_to_file = {
+                executor.submit(self.analyze_file, file_path, calculate_hashes): file_path 
+                for file_path in files_to_scan
+            }
+            
+            for future in concurrent.futures.as_completed(future_to_file):
+                file_path = future_to_file[future]
                 try:
-                    file_info = self.analyze_file(file_path)
+                    file_info = future.result()
                     if file_info:
                         self.scan_results.append(file_info)
                         self.check_suspicious(file_info)
                         
                         if progress_callback:
                             progress_callback(file_info)
-                            
                 except Exception as e:
-                    # log.error(f"Error scanning {file_path}: {e}")
-                    pass # Suppress individual file errors during scan to keep CLI clean
+                    # log.error(f"Error processing {file_path}: {e}")
+                    pass
 
-        # log.success(f"Scan complete. Found {len(self.scan_results)} files.")
         return self.scan_results
 
-    def analyze_file(self, file_path):
-        """Extracts metadata and identifies file type using magic bytes."""
+    def analyze_file(self, file_path, calculate_hashes=False):
+        """Extracts metadata, identifies file type, and optionally calculates hash."""
         try:
             stats = os.stat(file_path)
             file_size = stats.st_size
@@ -48,6 +61,10 @@ class Scanner:
             detected_type = get_file_type(header)
             extension = os.path.splitext(file_path)[1].lower().replace(".", "")
 
+            file_hash = None
+            if calculate_hashes:
+                file_hash = self.calculate_hash(file_path)
+
             return {
                 "path": file_path,
                 "size": file_size,
@@ -56,11 +73,24 @@ class Scanner:
                 "accessed": accessed,
                 "extension_claimed": extension,
                 "extension_detected": detected_type,
+                "hash_sha256": file_hash,
                 "suspicious": False
             }
         except PermissionError:
             log.warning(f"Permission denied: {file_path}")
             return None
+        except Exception:
+            return None
+
+    def calculate_hash(self, file_path):
+        """Calculates SHA256 hash of a file."""
+        sha256_hash = hashlib.sha256()
+        try:
+            with open(file_path, "rb") as f:
+                # Read in chunks to avoid memory issues with large files
+                for byte_block in iter(lambda: f.read(4096), b""):
+                    sha256_hash.update(byte_block)
+            return sha256_hash.hexdigest()
         except Exception:
             return None
 
@@ -77,7 +107,7 @@ class Scanner:
                      file_info["suspicious"] = True
                      file_info["reason"] = "Double extension detected"
                      self.suspicious_files.append(file_info)
-                     log.warning(f"[bold red]Suspicious file detecting (Double Extension): {file_info['path']}[/bold red]")
+                     # log.warning(f"[bold red]Suspicious file detecting (Double Extension): {file_info['path']}[/bold red]")
 
         # Check for mismatched extensions
         if file_info["extension_detected"] and file_info["extension_detected"] != file_info["extension_claimed"]:
@@ -88,4 +118,4 @@ class Scanner:
                  file_info["suspicious"] = True
                  file_info["reason"] = f"Extension Mismatch (Claimed: {file_info['extension_claimed']}, Detected: {file_info['extension_detected']})"
                  self.suspicious_files.append(file_info)
-                 log.warning(f"[bold red]Suspicious file detected (Mismatch): {file_info['path']}[/bold red]")
+                 # log.warning(f"[bold red]Suspicious file detected (Mismatch): {file_info['path']}[/bold red]")

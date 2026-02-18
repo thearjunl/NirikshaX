@@ -4,12 +4,13 @@
 
 ## Features
 
-- **Filesystem Scanner**: Deep recursive scanning with magic byte validation (not just extensions).
+- **Filesystem Scanner**: fast multi-threaded scanning with magic byte validation.
 - **Recovery Engine**: Automated identification and recovery of files.
+- **File Hashing**: SHA256 hash calculation for file integrity verification.
 - **Timeline Analysis**: Chronological reconstruction of file modifications and access.
 - **Artifact Collection**: Extraction of browser history, recent files, and system metadata.
 - **Suspicious File Detection**: Flags potential threats like double extensions and hidden executables.
-- **Detailed Reporting**: Generates structured JSON reports for all activities.
+- **Detailed Reporting**: Generates structured JSON and professional PDF reports.
 
 ## Installation
 
@@ -29,9 +30,9 @@
 NirikshaX helps investigators analyze a target directory or system.
 
 ### 1. Scan a Directory
-Identify all files, including suspicious ones.
+Identify all files, calculate hashes, and generate reports.
 ```bash
-python nirikshax.py scan /path/to/target
+python nirikshax.py scan /path/to/target --hash --report
 ```
 
 ### 2. Recover Files
